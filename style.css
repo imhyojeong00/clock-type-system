@@ -1,0 +1,475 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  transition: background-color 560ms ease;
+}
+body.xray-mode {
+  background-color: #d9d9d7;
+}
+
+#main-view {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+}
+#main-view.dragging { cursor: grabbing; }
+#main-view img {
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+#world {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 46%;
+}
+#world.world-animated {
+  transition: transform 620ms cubic-bezier(0.22, 0.61, 0.24, 1);
+}
+
+#xray-strip-layer {
+  position: absolute;
+  inset: 0;
+}
+.arbor {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 0;
+  height: 0;
+}
+.strip-slot {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.clock-node {
+  position: absolute;
+  will-change: transform, filter, opacity;
+}
+.clock-node img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+.clock-node .orig { transition: opacity 480ms ease; }
+.clock-node .xr {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 480ms ease;
+}
+body.xray-mode .clock-node .orig { opacity: 0; }
+body.xray-mode .clock-node .xr { opacity: 1; }
+
+.x-hands,
+.x-second {
+  transform-origin: var(--px) var(--py);
+}
+
+@keyframes sec-rot {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes sec-stop2go {
+  0%     { transform: rotate(0deg); }
+  97.5%  { transform: rotate(360deg); }
+  100%   { transform: rotate(360deg); }
+}
+.x-second.m-sweep   { animation: sec-rot 60s linear var(--sec-delay, 0ms) infinite; }
+.x-second.m-tick    { animation: sec-rot 60s steps(60, end) var(--sec-delay, 0ms) infinite; }
+.x-second.m-stop2go { animation: sec-stop2go 60s linear var(--sec-delay, 0ms) infinite; }
+
+.clock-node.root-ghost {
+  mix-blend-mode: multiply;
+  opacity: 0.82;
+}
+.root-ghost .xr img { animation: none !important; }
+.root-ghost .x-body   { opacity: 0.14; }
+.root-ghost .x-dial   { opacity: 0.2; }
+.root-ghost .x-hands  { opacity: 0.85; }
+.root-ghost .x-second { opacity: 0.85; }
+.root-ghost .orig     { opacity: 0.86; }
+body.xray-mode .root-ghost .orig { opacity: 0; }
+
+.clock-node.hands-dropped .x-hands,
+.clock-node.hands-dropped .x-second {
+  display: none;
+}
+.clock-node.hands-dropped .xr,
+.clock-node.no-xray .xr {
+}
+.clock-node.hands-dropped .xr::after,
+.clock-node.no-xray .xr::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(120, 140, 160, 0.12) 0px,
+    rgba(120, 140, 160, 0.12) 2px,
+    transparent 2px,
+    transparent 5px
+  );
+  mix-blend-mode: multiply;
+  animation: glitch-scan 2.6s linear infinite;
+  pointer-events: none;
+  -webkit-mask-image: var(--mask);
+  mask-image: var(--mask);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+@keyframes glitch-scan {
+  0%   { transform: translateY(0); opacity: 0.7; }
+  50%  { transform: translateY(6px); opacity: 0.95; }
+  100% { transform: translateY(0); opacity: 0.7; }
+}
+.clock-node.no-xray .xr img { opacity: 1; }
+
+#anchor-marker {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: rgba(196, 62, 42, 0.8);
+  box-shadow: 0 0 0 5px rgba(196, 62, 42, 0.12);
+  pointer-events: none;
+  z-index: 5;
+  transition: opacity 400ms ease;
+}
+body.xray-mode #anchor-marker { opacity: 0.35; }
+
+#main-label {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(880px, 78vw);
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    "Malgun Gothic", "Segoe UI", sans-serif;
+  font-weight: 300;
+  color: #444;
+  z-index: 20;
+  pointer-events: none;
+  line-height: 1.45;
+}
+.lb-head {
+  font-size: 14px;
+  letter-spacing: 0.2px;
+  color: #222;
+}
+.lb-key {
+  display: inline-block;
+  min-width: 18px;
+  margin-right: 8px;
+  padding: 0 6px;
+  border: 1px solid rgba(196, 62, 42, 0.45);
+  border-radius: 999px;
+  color: #c43e2a;
+  font-size: 12px;
+  line-height: 18px;
+  vertical-align: 1px;
+}
+.lb-year,
+.lb-note {
+  margin-left: 8px;
+  color: #999;
+  font-size: 12px;
+}
+.lb-list {
+  margin-top: 5px;
+  font-size: 11px;
+  color: #666;
+}
+.lb-title {
+  color: #aaa;
+  margin-right: 10px;
+}
+.lb-part {
+  display: inline-block;
+  margin: 0 7px;
+  white-space: nowrap;
+}
+.lb-role {
+  color: #aaa;
+  margin-right: 5px;
+}
+.lb-from {
+  color: #c43e2a;
+  opacity: 0.7;
+  font-size: 10px;
+}
+body.xray-mode .lb-head { color: #111; }
+
+#ui-bar {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(6px);
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  max-width: 90vw;
+}
+#typed-display {
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    "Malgun Gothic", "Segoe UI", sans-serif;
+  font-weight: 300;
+  font-size: 15px;
+  letter-spacing: 1px;
+  color: #222;
+  min-width: 90px;
+  max-width: 46vw;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+  padding-bottom: 3px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+}
+#typed-display::-webkit-scrollbar { display: none; }
+#typed-display:empty::before {
+  content: "TYPE A–Y";
+  color: #999;
+}
+#symbol-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding-left: 10px;
+  border-left: 1px solid rgba(0, 0, 0, 0.08);
+}
+#key-capture {
+  position: fixed;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  border: none;
+  padding: 0;
+  pointer-events: none;
+}
+#clear-btn {
+  background: transparent;
+  border: none;
+  color: #bbb;
+  width: 20px;
+  height: 20px;
+  font-size: 16px;
+  line-height: 20px;
+  cursor: pointer;
+}
+#clear-btn:hover { color: #333; }
+
+#xray-toggle {
+  position: fixed;
+  top: 20px;
+  right: 22px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    "Malgun Gothic", "Segoe UI", sans-serif;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  color: #888;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 999px;
+  padding: 7px 13px 7px 10px;
+  cursor: pointer;
+  transition: color 220ms ease, border-color 220ms ease, background 220ms ease;
+}
+#xray-toggle:hover { color: #444; border-color: rgba(0, 0, 0, 0.2); }
+#xray-toggle .xray-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ccc;
+  transition: background 220ms ease, box-shadow 220ms ease;
+}
+#xray-toggle[aria-pressed="true"] {
+  color: #eee;
+  background: rgba(30, 30, 30, 0.85);
+  border-color: rgba(0, 0, 0, 0.6);
+}
+#xray-toggle[aria-pressed="true"] .xray-dot {
+  background: #7ee0ff;
+  box-shadow: 0 0 6px 1px rgba(126, 224, 255, 0.8);
+}
+
+#zoom-controls {
+  position: fixed;
+  top: 64px;
+  right: 22px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    "Malgun Gothic", "Segoe UI", sans-serif;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 999px;
+  padding: 4px 6px;
+}
+#zoom-controls button {
+  background: transparent;
+  border: none;
+  color: #888;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 14px;
+  line-height: 22px;
+  cursor: pointer;
+}
+#zoom-controls button:hover { background: rgba(0, 0, 0, 0.06); color: #333; }
+#zoom-reset-btn { font-size: 12px; }
+#zoom-label {
+  font-size: 10px;
+  color: #999;
+  width: 34px;
+  text-align: center;
+  user-select: none;
+}
+
+.graft {
+  position: absolute;
+  pointer-events: none;
+  transform-origin: var(--px) var(--py);
+}
+.graft img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  transition: opacity 480ms ease;
+}
+.graft .gp-xr { opacity: 0; }
+body.xray-mode .graft .gp-orig { opacity: 0; }
+body.xray-mode .graft .gp-xr { opacity: 1; }
+
+.graft-dial { mix-blend-mode: multiply; }
+
+.hands-dropped .graft-hands,
+.hands-dropped .graft-second {
+  display: none;
+}
+
+body.xray-mode .root-ghost .graft-dial { opacity: 0.18; }
+.root-ghost .graft .x-second { animation: none !important; }
+
+.line-slot {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.line-tag {
+  position: absolute;
+  z-index: 10;
+  transform: translateX(-50%);
+  pointer-events: auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    "Malgun Gothic", "Segoe UI", sans-serif;
+  font-weight: 300;
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: #999;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 2px 9px;
+  cursor: pointer;
+  transition: color 240ms ease, border-color 240ms ease;
+}
+.line-tag:hover { color: #333; border-color: rgba(0, 0, 0, 0.15); }
+.line-slot.is-focus .line-tag {
+  color: #c43e2a;
+  border-color: rgba(196, 62, 42, 0.35);
+}
+
+.graft-body { opacity: 1; }
+
+.line-slot.is-focus { z-index: 2; }
+
+.xr-back {
+  position: absolute;
+  inset: 0;
+  background: #d9d9d7;
+  -webkit-mask-image: var(--silhouette);
+  mask-image: var(--silhouette);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+.graft .xr-back { opacity: 0; transition: opacity 480ms ease; }
+body.xray-mode .graft .xr-back { opacity: 1; }
+
+.clock-node .orig,
+.graft-body .gp-orig {
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.16));
+}
+
+.line-slot.growing { filter: url(#goo-melt); }
+.clock-node.grow-in {
+  transform-origin: var(--px) var(--py);
+  transform: scale(1.05, 0.93);
+  filter: blur(10px);
+  transition: transform 1100ms cubic-bezier(0.22, 0.61, 0.24, 1),
+              filter 1100ms cubic-bezier(0.22, 0.61, 0.24, 1);
+}
+.clock-node.grow-in.settled {
+  transform: none;
+  filter: blur(0px);
+}
+
+#sound-toggle {
+  position: fixed;
+  top: 108px;
+  right: 22px;
+  z-index: 1000;
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+    "Malgun Gothic", "Segoe UI", sans-serif;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  color: #888;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 999px;
+  padding: 7px 13px;
+  cursor: pointer;
+}
+#sound-toggle:hover { color: #444; }
+#sound-toggle[aria-pressed="false"] { color: #bbb; text-decoration: line-through; }
+
+body.xray-mode .line-slot .clock-node { mix-blend-mode: multiply; }
+body.xray-mode .xr-back,
+body.xray-mode .graft .xr-back { display: none; }

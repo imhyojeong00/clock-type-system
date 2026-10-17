@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <title>Clock-Type System — Im Hyojeong</title>
+  <meta name="description" content="A typing system where each letter A–Y is a clock, rebuilt on one shared arbor with parts grafted from other clocks.">
+  <script>
+    document.documentElement.classList.add(
+      window.matchMedia("(hover: none) and (pointer: coarse)").matches ? "touch-ui" : "desk-ui"
+    );
+  </script>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./app.css">
+</head>
+<body>
+
+  <svg id="goo-defs" width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <filter id="goo-melt" x="-50%" y="-60%" width="200%" height="220%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.05 0.008" numOctaves="2" seed="7" result="noise" />
+        <feDisplacementMap id="goo-displace" in="SourceGraphic" in2="noise" scale="6" xChannelSelector="R" yChannelSelector="G" result="wobbled" />
+        <feGaussianBlur in="wobbled" stdDeviation="4" result="blurred" />
+        <feColorMatrix in="blurred" mode="matrix"
+          values="1 0 0 0 0
+                   0 1 0 0 0
+                   0 0 1 0 0
+                   0 0 0 22 -9"
+          result="goo" />
+      </filter>
+    </defs>
+  </svg>
+
+  <button id="menu-btn" class="round-btn" type="button" aria-label="Open menu" data-i18n-aria="menu_open" aria-controls="drawer" aria-expanded="false">
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg>
+  </button>
+
+  <button id="xray-toggle" type="button" aria-pressed="false">
+    <span class="xray-dot"></span>X-RAY
+  </button>
+
+  <div id="zoom-controls">
+    <button id="zoom-out-btn" type="button" aria-label="Zoom out" data-i18n-aria="zoom_out">−</button>
+    <span id="zoom-label">100%</span>
+    <button id="zoom-in-btn" type="button" aria-label="Zoom in" data-i18n-aria="zoom_in">+</button>
+    <button id="zoom-reset-btn" type="button" aria-label="Reset zoom" data-i18n-aria="zoom_reset">⟲</button>
+  </div>
+
+  <button id="sound-toggle" type="button" aria-pressed="true">SOUND</button>
+
+  <button id="lang-toggle" type="button" data-lang="en" aria-label="Switch language">
+    <span class="lang-en">EN</span><span class="lang-sep" aria-hidden="true">/</span><span class="lang-ko">KR</span>
+  </button>
+
+  <div id="main-view">
+    <div id="main-label">TYPE A–Y</div>
+    <div id="world">
+      <div id="xray-strip-layer"></div>
+      <div id="anchor-marker"></div>
+    </div>
+  </div>
+
+  <div id="ui-bar">
+    <div id="type-row">
+      <div id="typed-display"></div>
+      <button id="kbd-toggle" type="button" data-i18n="keys_hide">Hide keys</button>
+    </div>
+    <input id="key-capture" type="text" autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" autofocus aria-label="Type A–Y" data-i18n-aria="type_az">
+    <div id="symbol-row">
+      <button id="clear-btn" type="button" aria-label="clear">×</button>
+    </div>
+    <div id="kbd" role="group" aria-label="Clock keyboard" data-i18n-aria="kbd_label"></div>
+  </div>
+
+  <div id="scrim" hidden></div>
+  <nav id="drawer" class="app-overlay" aria-label="Menu" data-i18n-aria="menu" aria-hidden="true">
+    <div class="drawer-head">
+      <span class="pivot-dot" aria-hidden="true"></span>
+      <span class="drawer-title">Clock-Type System</span>
+      <button class="close-x" type="button" data-close aria-label="Close menu" data-i18n-aria="close_menu">×</button>
+    </div>
+    <div class="drawer-group">
+      <button type="button" data-act="about" data-i18n="d_about">About this work</button>
+    </div>
+    <div class="drawer-group">
+      <button type="button" data-act="xray" data-i18n="d_xray">X-ray</button>
+      <button type="button" data-act="sound">Sound</button>
+      <button type="button" data-act="latest" data-i18n="d_latest">Back to latest clock</button>
+      <button type="button" data-act="zoomreset" data-i18n="d_zoomreset">Reset zoom</button>
+    </div>
+    <div class="drawer-group">
+      <button type="button" data-act="clear" data-i18n="d_clear">Clear all clocks</button>
+    </div>
+    <div class="drawer-foot">
+      <span data-i18n="maker_name">Im Hyojeong</span><br>
+      <a href="https://www.instagram.com/iojiji9/" target="_blank" rel="noopener">@iojiji9</a><br>
+      <a href="mailto:imhyojeong050@gmail.com">imhyojeong050@gmail.com</a>
+    </div>
+  </nav>
+
+  <section id="about" class="app-overlay modal" role="dialog" aria-modal="true" aria-labelledby="about-title" aria-hidden="true">
+    <div class="modal-card">
+      <button class="close-x" type="button" data-close aria-label="Close" data-i18n-aria="close">×</button>
+      <span class="pivot-dot" aria-hidden="true"></span>
+      <h1 id="about-title">Clock-Type System</h1>
+
+      <p data-i18n-html="about_p1">Succulents arose in many places at once and survived by grafting and shedding parts. This site carries that logic over to clocks.</p>
+      <p data-i18n-html="about_p2">Each letter from A to Y is a clock. Type one and it is rebuilt on a single shared arbor — the axle the hands turn on — with the case, numerals, hands and second hand of five other clocks grafted onto it.</p>
+
+      <ol class="about-steps">
+        <li data-i18n-html="about_s1">Type A–Y. Clocks line up like a sentence and overlap. Z is still empty.</li>
+        <li data-i18n-html="about_s2">Type the same letter twice and the hands fall out.</li>
+        <li data-i18n-html="about_s3">Swipe to look back along the line, tap a letter to jump to its clock, pinch to zoom.</li>
+        <li data-i18n-html="about_s4">Turn on <b>X-RAY</b> to watch each clock being assembled from the inside. With sound on, every clock keeps ticking in its own rhythm.</li>
+      </ol>
+
+      <div class="about-maker">
+        <p data-i18n-html="about_maker">Im Hyojeong, Advanced Course, Kaywon University of Art &amp; Design, Korea</p>
+        <p class="about-links">
+          <a href="https://www.instagram.com/iojiji9/" target="_blank" rel="noopener">Instagram @iojiji9</a>
+          <a href="mailto:imhyojeong050@gmail.com">imhyojeong050@gmail.com</a>
+        </p>
+      </div>
+
+      <button id="about-start" class="start-btn" type="button" data-close data-i18n="about_start">Start typing</button>
+    </div>
+  </section>
+
+  <script src="./i18n.js"></script>
+  <script src="./data.js"></script>
+  <script src="./script.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
