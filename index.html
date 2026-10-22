@@ -49,9 +49,8 @@
 
   <button id="sound-toggle" type="button" aria-pressed="true">SOUND</button>
 
-  <button id="lang-toggle" type="button" data-lang="en" aria-label="Switch language">
-    <span class="lang-en">EN</span><span class="lang-sep" aria-hidden="true">/</span><span class="lang-ko">KR</span>
-  </button>
+  <!-- 한글 버튼 하나: 누르면 한국어(버튼 진하게), 다시 누르면 영문 -->
+  <button id="lang-toggle" type="button" data-lang="en" aria-pressed="false" aria-label="한국어">한</button>
 
   <div id="main-view">
     <div id="main-label">TYPE A–Y</div>
@@ -132,5 +131,6 @@
   <script src="./data.js"></script>
   <script src="./script.js"></script>
   <script src="./app.js"></script>
+  <script src="./exhibition.js"></script>
 </body>
 </html>

@@ -397,9 +397,7 @@ body.kbd-collapsed #type-row { padding-bottom: 2px; }
   cursor: pointer;
 }
 #lang-toggle:hover { border-color: rgba(0, 0, 0, 0.2); }
-#lang-toggle .lang-sep { color: #ddd; font-weight: 300; }
-#lang-toggle[data-lang="en"] .lang-en,
-#lang-toggle[data-lang="ko"] .lang-ko { color: #444; }
+#lang-toggle[aria-pressed="true"] { color: #444; border-color: rgba(0, 0, 0, 0.28); }
 #lang-toggle:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 
 .touch-ui #lang-toggle {

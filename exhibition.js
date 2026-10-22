@@ -11,6 +11,93 @@
 // 끄고 싶을 때: 주소 뒤에 ?demo=off
 // ================================================================
 
+<<<<<<< HEAD
+=======
+// ================================================================
+// SOUND UNLOCK — 브라우저 자동재생 정책 대응
+//
+// 크롬·사파리는 사람이 페이지를 한 번 클릭하거나 키를 누르기 전에는 소리를 막음
+// (VS Code 미리보기에는 이 제한이 없어서 거기서는 처음부터 소리가 났던 것)
+// · 소리가 막혀 있을 때만 화면 아래에 "CLICK FOR SOUND" 안내가 뜸
+// · 그 상태에서의 첫 클릭은 소리만 켜고, 자동 타이핑은 끊지 않고 그대로 이어감
+//   (전시 세팅 때 한 번만 눌러 두면 됨)
+// · 키를 누르면 소리가 켜지면서 원래대로 관람자 타이핑으로 넘어감
+// · 처음부터 소리가 허용된 환경(VS Code 미리보기, 자동재생 허용한 키오스크)에서는 아무것도 하지 않음
+// ================================================================
+(function exhibitSoundUnlock() {
+  if (/[?&]demo=off\b/i.test(location.search)) return;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return;
+
+  // 이 사이트의 소리를 깨우는 방법
+  const resumeSite = () => {
+    try { if (navigator.audioSession && navigator.audioSession.type !== "playback") navigator.audioSession.type = "playback"; } catch (e) {}
+    try { if (typeof Sound !== "undefined") Sound.init(); } catch (e) {}
+  };
+
+  let probe = null;
+  try { probe = new AC(); } catch (e) { return; }
+  let locked = false;
+  let swallowed = false;
+  let hint = null;
+
+  const isUnlocked = () => !probe || probe.state === "running";
+
+  function finish() {
+    locked = false;
+    if (hint) { hint.style.opacity = "0"; setTimeout(() => hint && hint.remove(), 600); }
+    ["pointerdown", "pointerup", "touchend", "click", "keydown"].forEach((ev) => window.removeEventListener(ev, onGesture, true));
+    try { probe.close(); } catch (e) {}
+    probe = null;
+  }
+
+  function showHint() {
+    if (hint || !document.body) return;
+    hint = document.createElement("div");
+    hint.id = "sound-unlock-hint";
+    hint.textContent = "♪ CLICK FOR SOUND";
+    hint.setAttribute("aria-hidden", "true");
+    hint.style.cssText = [
+      "position:fixed", "left:50%", "bottom:22px", "transform:translateX(-50%)",
+      "z-index:2147483000", "pointer-events:none",
+      "font:inherit", "font-size:11px", "letter-spacing:0.14em", "line-height:1",
+      "padding:8px 12px", "border:1px solid currentColor", "border-radius:999px",
+      "color:#fff", "mix-blend-mode:difference",
+      "opacity:0", "transition:opacity .6s ease"
+    ].join(";");
+    document.body.appendChild(hint);
+    requestAnimationFrame(() => { if (hint) hint.style.opacity = "0.75"; });
+  }
+
+  function onGesture(e) {
+    if (!e.isTrusted || !locked) return;
+    resumeSite();
+    if (probe && probe.state !== "closed") {
+      probe.resume().then(() => { if (isUnlocked() && locked) finish(); }).catch(() => {});
+    }
+    // 첫 클릭은 소리만 켜고 자동 타이핑은 계속 (버튼·메뉴를 누른 경우는 원래 기능 그대로)
+    if (e.type === "pointerdown" && !swallowed) {
+      swallowed = true;
+      const onControl = e.target && e.target.closest && e.target.closest("button, a, input, select, textarea, [role='button']");
+      if (!onControl) e.stopImmediatePropagation();
+    }
+  }
+
+  // 이 스크립트가 다른 입력 처리보다 먼저 듣도록 가장 먼저 등록
+  ["pointerdown", "pointerup", "touchend", "click", "keydown"].forEach((ev) => window.addEventListener(ev, onGesture, true));
+  locked = true;
+
+  // 생성 직후에는 상태가 늦게 바뀌는 브라우저가 있어서 잠깐 기다렸다가 판단
+  setTimeout(() => {
+    if (!probe) return;
+    if (isUnlocked()) { finish(); return; }
+    probe.onstatechange = () => { if (isUnlocked() && locked) finish(); };
+    if (document.body) showHint();
+    else document.addEventListener("DOMContentLoaded", showHint, { once: true });
+  }, 700);
+})();
+
+>>>>>>> 1a72244 (Update website)
 const EXHIBIT = {
   LETTERS: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
   START_DELAY_MS: 1400,      // 화면이 비워진 뒤 첫 글자가 나오기까지

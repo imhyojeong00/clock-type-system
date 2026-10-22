@@ -91,8 +91,8 @@ const STR = {
 
 const COUNTRY_KO = { Germany: "독일", Czechia: "체코", France: "프랑스" };
 
+// 항상 영문으로 시작 (예전에는 마지막 선택이 저장돼서 다음 방문 때 한국어로 열리기도 했음)
 let LANG = "en";
-try { if (localStorage.getItem("cts-lang") === "ko") LANG = "ko"; } catch (e) {}
 
 function tr(key) {
   return (STR[LANG] && STR[LANG][key]) || STR.en[key] || key;
@@ -111,13 +111,13 @@ function applyStaticText() {
   const t = document.getElementById("lang-toggle");
   if (t) {
     t.dataset.lang = LANG;
-    t.setAttribute("aria-label", tr("lang_label"));
+    t.setAttribute("aria-pressed", String(LANG === "ko"));
+    t.setAttribute("aria-label", LANG === "ko" ? "English" : "한국어");
   }
 }
 
 function setLang(next) {
   LANG = next === "ko" ? "ko" : "en";
-  try { localStorage.setItem("cts-lang", LANG); } catch (e) {}
   applyStaticText();
   document.dispatchEvent(new Event("langchange"));
 }
